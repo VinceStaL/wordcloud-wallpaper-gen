@@ -663,8 +663,13 @@
       <div class="section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div class="section-label" style="margin-bottom:0">Words</div>
-          <button class="btn btn-ghost" id="clearAllBtn" style="font-size:11px;padding:3px 7px;" title="Clear all words">Clear all</button>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <button class="btn btn-ghost" id="importWordsBtn" style="font-size:11px;padding:3px 7px;" title="Import words from text file">Import</button>
+            <button class="btn btn-ghost" id="exportWordsBtn" style="font-size:11px;padding:3px 7px;" title="Export words to text file">Export</button>
+            <button class="btn btn-ghost" id="clearAllBtn" style="font-size:11px;padding:3px 7px;" title="Clear all words">Clear all</button>
+          </div>
         </div>
+        <input type="file" id="importFileInput" accept=".txt,text/plain" style="display:none;">
         <div class="word-list" id="wordList">
           <div class="word-empty" id="wordEmpty">No words yet. Add some above!</div>
         </div>
@@ -950,6 +955,50 @@ clearAllBtn.addEventListener('click', () => {
   refreshWordList();
   updateBadge();
   render();
+});
+
+// ── Import / Export words ──
+const importWordsBtn = document.getElementById('importWordsBtn');
+const exportWordsBtn = document.getElementById('exportWordsBtn');
+const importFileInput = document.getElementById('importFileInput');
+
+exportWordsBtn.addEventListener('click', () => {
+  if (state.words.length === 0) return;
+  const lines = state.words.map(w => w.text);
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.download = 'wordcloud-words.txt';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+importWordsBtn.addEventListener('click', () => {
+  importFileInput.value = '';
+  importFileInput.click();
+});
+
+importFileInput.addEventListener('change', () => {
+  const file = importFileInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split(/\r?\n/);
+    let added = 0;
+    lines.forEach(line => {
+      const text = line.trim().slice(0, 30);
+      if (text) {
+        state.words.push({ text, rating: 5, strikethrough: false });
+        added++;
+      }
+    });
+    if (added > 0) {
+      refreshWordList();
+      updateBadge();
+      render();
+    }
+  };
+  reader.readAsText(file);
 });
 
 bgColorPicker.addEventListener('input', () => { state.bgColor = bgColorPicker.value; render(); });
