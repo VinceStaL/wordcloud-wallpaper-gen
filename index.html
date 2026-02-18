@@ -619,6 +619,67 @@
     background: var(--sidebar-border);
     margin: 2px 0 14px;
   }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .app {
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    /* Main / preview comes first */
+    .main {
+      order: -1;
+      flex: 0 0 auto;
+      height: 42dvh;
+      min-height: 0;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .main-header {
+      padding: 10px 14px;
+    }
+
+    .canvas-area {
+      padding: 10px;
+    }
+
+    /* Sidebar becomes a scrollable bottom panel */
+    .sidebar {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 0;
+      border-right: none;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 12px 14px 10px;
+    }
+
+    .sidebar-scroll {
+      padding: 12px 14px 16px;
+    }
+
+    /* Tighten sections on small screens */
+    .section {
+      margin-bottom: 16px;
+    }
+
+    .palette-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .word-list {
+      max-height: 120px;
+    }
+
+    .btn-download {
+      margin-top: 6px;
+    }
+  }
 </style>
 </head>
 <body>
