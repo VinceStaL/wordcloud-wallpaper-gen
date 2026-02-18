@@ -300,6 +300,51 @@
     flex-shrink: 0;
   }
 
+  .word-chip-name.is-strikethrough {
+    text-decoration: line-through;
+    color: var(--text-muted-dark);
+  }
+
+  /* Strikethrough checkbox row */
+  .strike-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+    width: fit-content;
+  }
+
+  .strike-row input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .strike-row-label {
+    font-size: 12px;
+    color: var(--text-muted-dark);
+    transition: color var(--transition);
+  }
+
+  .strike-row:hover .strike-row-label { color: var(--text-on-dark); }
+
+  .strike-preview {
+    font-size: 12px;
+    color: var(--text-muted-dark);
+    text-decoration: line-through;
+    margin-left: 2px;
+  }
+
+  .chip-strike-icon {
+    flex-shrink: 0;
+    color: #EF4444;
+    opacity: 0.7;
+  }
+
   .word-empty {
     text-align: center;
     color: var(--text-muted-dark);
@@ -603,6 +648,10 @@
           <input type="range" id="ratingSlider" min="1" max="10" value="5">
           <span class="rating-value" id="ratingDisplay">5</span>
         </div>
+        <label class="strike-row" id="strikeLabel">
+          <input type="checkbox" id="strikeToggle">
+          <span class="strike-row-label">Strikethrough</span>
+        </label>
         <button class="btn btn-primary" id="addWordBtn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Word
@@ -713,7 +762,7 @@
 <script>
 // ── State ──
 const state = {
-  words: [],          // [{text, rating}]
+  words: [],          // [{text, rating, strikethrough}]
   palette: 0,
   bgColor: '#0f172a',
   font: 0,
@@ -743,6 +792,7 @@ const FONTS = [
 const wordInput   = document.getElementById('wordInput');
 const ratingSlider = document.getElementById('ratingSlider');
 const ratingDisplay = document.getElementById('ratingDisplay');
+const strikeToggle = document.getElementById('strikeToggle');
 const addWordBtn  = document.getElementById('addWordBtn');
 const clearAllBtn = document.getElementById('clearAllBtn');
 const wordList    = document.getElementById('wordList');
@@ -834,8 +884,19 @@ function refreshWordList() {
       chip.className = 'word-chip';
 
       const nameEl = document.createElement('span');
-      nameEl.className = 'word-chip-name';
+      nameEl.className = 'word-chip-name' + (w.strikethrough ? ' is-strikethrough' : '');
       nameEl.textContent = w.text;
+
+      if (w.strikethrough) {
+        const strikeIcon = document.createElement('span');
+        strikeIcon.className = 'chip-strike-icon';
+        strikeIcon.title = 'Strikethrough word';
+        strikeIcon.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+        chip.appendChild(nameEl);
+        chip.appendChild(strikeIcon);
+      } else {
+        chip.appendChild(nameEl);
+      }
 
       const badge = document.createElement('span');
       badge.className = 'word-chip-badge';
@@ -852,7 +913,6 @@ function refreshWordList() {
         render();
       });
 
-      chip.appendChild(nameEl);
       chip.appendChild(badge);
       chip.appendChild(delBtn);
       wordList.appendChild(chip);
@@ -870,8 +930,10 @@ function addWord() {
   const text = wordInput.value.trim();
   if (!text) { wordInput.focus(); return; }
   const rating = parseInt(ratingSlider.value, 10);
-  state.words.push({ text, rating });
+  const strikethrough = strikeToggle.checked;
+  state.words.push({ text, rating, strikethrough });
   wordInput.value = '';
+  strikeToggle.checked = false;
   wordInput.focus();
   refreshWordList();
   updateBadge();
@@ -1015,6 +1077,20 @@ function render(targetCanvas, targetW, targetH) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(word.text, 0, 0);
+
+        // Draw strikethrough line on canvas
+        if (word.strikethrough) {
+          const lineThickness = Math.max(1, fontSize * 0.06);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = lineThickness;
+          ctx.globalAlpha = 0.85;
+          ctx.beginPath();
+          ctx.moveTo(-tw / 2, 0);
+          ctx.lineTo(tw / 2, 0);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+
         placed_flag = true;
         break;
       }
