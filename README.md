@@ -2,6 +2,8 @@
 
 A browser-based tool to create personalised word cloud wallpapers. Add words with weights, customise the look, and export at any screen resolution — no installation or internet connection required.
 
+Use it now: [wordcloud-wallpaper.pages.dev](https://wordcloud-wallpaper.pages.dev/)
+
 ![Screenshot](wordcloud-1290x2796.png)
 
 ## Features
@@ -28,17 +30,17 @@ A browser-based tool to create personalised word cloud wallpapers. Add words wit
 
 ## Export Sizes
 
-| Category | Size |
-|----------|------|
-| Desktop HD | 1920 × 1080 |
-| Desktop QHD | 2560 × 1440 |
-| Desktop 4K | 3840 × 2160 |
-| MacBook Air | 2560 × 1600 |
-| MacBook Pro | 3024 × 1964 |
-| iPhone 14 | 1170 × 2532 |
+| Category          | Size         |
+| ----------------- | ------------ |
+| Desktop HD        | 1920 × 1080 |
+| Desktop QHD       | 2560 × 1440 |
+| Desktop 4K        | 3840 × 2160 |
+| MacBook Air       | 2560 × 1600 |
+| MacBook Pro       | 3024 × 1964 |
+| iPhone 14         | 1170 × 2532 |
 | iPhone 14 Pro Max | 1290 × 2796 |
-| Android | 1080 × 2400 |
-| Android QHD | 1440 × 3200 |
+| Android           | 1080 × 2400 |
+| Android QHD       | 1440 × 3200 |
 
 ## Tech Stack
 
