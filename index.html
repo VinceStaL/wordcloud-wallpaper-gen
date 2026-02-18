@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordCloud Wallpaper</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F8F9FA;
+    --sidebar: #111318;
+    --sidebar-surface: #1C1F26;
+    --sidebar-border: #2A2D35;
+    --text-primary: #111318;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --text-on-dark: #E5E7EB;
+    --text-muted-dark: #6B7280;
+    --accent: #0D9488;
+    --accent-light: #14B8A6;
+    --accent-hover: #0F766E;
+    --danger: #EF4444;
+    --surface: #FFFFFF;
+    --border: #E5E7EB;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --transition: 150ms ease;
+    --sidebar-width: 320px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: var(--sidebar);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--sidebar-border);
+  }
+
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--sidebar-border);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo svg { color: var(--accent-light); }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted-dark);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 20px;
+    scrollbar-width: thin;
+    scrollbar-color: #2A2D35 transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: #2A2D35; border-radius: 2px; }
+
+  /* Sections */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted-dark);
+    margin-bottom: 10px;
+  }
+
+  /* Word Input */
+  .word-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .input-field {
+    background: var(--sidebar-surface);
+    border: 1px solid var(--sidebar-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-on-dark);
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color var(--transition);
+    width: 100%;
+    font-family: inherit;
+  }
+
+  .input-field::placeholder { color: var(--text-muted-dark); }
+  .input-field:focus { border-color: var(--accent); }
+
+  .word-text-input { flex: 1; }
+
+  .rating-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .rating-label {
+    font-size: 12px;
+    color: var(--text-muted-dark);
+    white-space: nowrap;
+    min-width: 52px;
+  }
+
+  .rating-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-light);
+    min-width: 18px;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--sidebar-border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--sidebar);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--accent-light);
+    transform: scale(1.15);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--sidebar);
+    cursor: pointer;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: background var(--transition), color var(--transition), opacity var(--transition), transform 80ms ease;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted-dark);
+    padding: 4px 6px;
+    border-radius: 4px;
+  }
+
+  .btn-ghost:hover { background: rgba(255,255,255,0.06); color: var(--text-on-dark); }
+
+  .btn-danger-ghost {
+    background: transparent;
+    color: var(--text-muted-dark);
+    padding: 3px 5px;
+    border-radius: 4px;
+  }
+
+  .btn-danger-ghost:hover { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+  .btn-download {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+  }
+
+  .btn-download:hover { background: var(--accent-hover); }
+
+  /* Word List */
+  .word-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #2A2D35 transparent;
+  }
+
+  .word-list::-webkit-scrollbar { width: 3px; }
+  .word-list::-webkit-scrollbar-thumb { background: #2A2D35; border-radius: 2px; }
+
+  .word-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px 6px 10px;
+    background: var(--sidebar-surface);
+    border: 1px solid var(--sidebar-border);
+    border-radius: var(--radius-sm);
+    gap: 8px;
+    animation: fadeIn 150ms ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .word-chip-name {
+    font-size: 13px;
+    color: var(--text-on-dark);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .word-chip-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-light);
+    background: rgba(20,184,166,0.12);
+    border-radius: 4px;
+    padding: 1px 6px;
+    min-width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .word-empty {
+    text-align: center;
+    color: var(--text-muted-dark);
+    font-size: 12px;
+    padding: 16px 0;
+    font-style: italic;
+  }
+
+  /* Palette Grid */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .palette-option {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color var(--transition), transform var(--transition);
+    position: relative;
+  }
+
+  .palette-option:hover { transform: scale(1.03); }
+  .palette-option.active { border-color: var(--accent-light); }
+
+  .palette-swatches {
+    display: flex;
+    height: 28px;
+  }
+
+  .palette-swatches span {
+    flex: 1;
+  }
+
+  .palette-name {
+    font-size: 10px;
+    color: var(--text-muted-dark);
+    text-align: center;
+    padding: 4px 2px;
+    background: var(--sidebar-surface);
+    line-height: 1;
+  }
+
+  /* Font Grid */
+  .font-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .font-option {
+    padding: 8px 10px;
+    background: var(--sidebar-surface);
+    border: 1px solid var(--sidebar-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .font-option:hover { background: rgba(255,255,255,0.04); }
+  .font-option.active { border-color: var(--accent); background: rgba(13,148,136,0.1); }
+
+  .font-preview {
+    font-size: 15px;
+    color: var(--text-on-dark);
+  }
+
+  .font-label {
+    font-size: 11px;
+    color: var(--text-muted-dark);
+  }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .toggle-text {
+    font-size: 12px;
+    color: var(--text-muted-dark);
+  }
+
+  .toggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--sidebar-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform var(--transition);
+  }
+
+  .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+  /* Color picker row */
+  .color-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .color-row-label {
+    font-size: 12px;
+    color: var(--text-muted-dark);
+  }
+
+  input[type="color"] {
+    -webkit-appearance: none;
+    width: 36px;
+    height: 26px;
+    border: 1px solid var(--sidebar-border);
+    border-radius: 6px;
+    padding: 2px;
+    background: var(--sidebar-surface);
+    cursor: pointer;
+    outline: none;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 4px; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+  /* Export */
+  .select-field {
+    background: var(--sidebar-surface);
+    border: 1px solid var(--sidebar-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-on-dark);
+    font-size: 12px;
+    padding: 7px 10px;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  .select-field:focus { border-color: var(--accent); }
+  .select-field option { background: #1C1F26; color: var(--text-on-dark); }
+
+  /* ── Main Canvas Area ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .main-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .main-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .word-count-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow var(--transition);
+    flex-shrink: 0;
+  }
+
+  .canvas-wrap:hover {
+    box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #previewCanvas {
+    display: block;
+  }
+
+  .canvas-empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .canvas-empty-state.visible { opacity: 1; }
+
+  .canvas-empty-icon {
+    width: 48px;
+    height: 48px;
+    color: #CBD5E1;
+  }
+
+  .canvas-empty-text {
+    font-size: 14px;
+    color: #94A3B8;
+    font-weight: 500;
+  }
+
+  .canvas-empty-sub {
+    font-size: 12px;
+    color: #CBD5E1;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--sidebar-border);
+    margin: 2px 0 14px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+        WordCloud
+      </div>
+      <div class="logo-sub">Wallpaper Generator</div>
+    </div>
+
+    <div class="sidebar-scroll">
+
+      <!-- Add Word -->
+      <div class="section">
+        <div class="section-label">Add Word</div>
+        <div class="word-input-row">
+          <input type="text" id="wordInput" class="input-field word-text-input" placeholder="Enter a word…" autocomplete="off" maxlength="30">
+        </div>
+        <div class="rating-wrap">
+          <span class="rating-label">Weight</span>
+          <input type="range" id="ratingSlider" min="1" max="10" value="5">
+          <span class="rating-value" id="ratingDisplay">5</span>
+        </div>
+        <button class="btn btn-primary" id="addWordBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Word
+        </button>
+      </div>
+
+      <!-- Word List -->
+      <div class="section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="section-label" style="margin-bottom:0">Words</div>
+          <button class="btn btn-ghost" id="clearAllBtn" style="font-size:11px;padding:3px 7px;" title="Clear all words">Clear all</button>
+        </div>
+        <div class="word-list" id="wordList">
+          <div class="word-empty" id="wordEmpty">No words yet. Add some above!</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Color Palette -->
+      <div class="section">
+        <div class="section-label">Color Palette</div>
+        <div class="palette-grid" id="paletteGrid"></div>
+      </div>
+
+      <!-- Background -->
+      <div class="section">
+        <div class="section-label">Background</div>
+        <div class="color-row">
+          <span class="color-row-label">Background color</span>
+          <input type="color" id="bgColorPicker" value="#0f172a" title="Background color">
+        </div>
+      </div>
+
+      <!-- Font -->
+      <div class="section">
+        <div class="section-label">Font</div>
+        <div class="font-grid" id="fontGrid"></div>
+      </div>
+
+      <!-- Rotation -->
+      <div class="section">
+        <div class="section-label">Layout</div>
+        <div class="toggle-row">
+          <span class="toggle-text">Allow word rotation (90°)</span>
+          <label class="toggle">
+            <input type="checkbox" id="rotationToggle" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Export -->
+      <div class="section">
+        <div class="section-label">Export</div>
+        <select class="select-field" id="exportSize">
+          <optgroup label="Desktop">
+            <option value="1920x1080">Desktop HD — 1920×1080</option>
+            <option value="2560x1440">Desktop QHD — 2560×1440</option>
+            <option value="3840x2160">Desktop 4K — 3840×2160</option>
+          </optgroup>
+          <optgroup label="MacBook">
+            <option value="2560x1600">MacBook Air — 2560×1600</option>
+            <option value="3024x1964">MacBook Pro — 3024×1964</option>
+          </optgroup>
+          <optgroup label="iPhone">
+            <option value="1170x2532">iPhone 14 — 1170×2532</option>
+            <option value="1290x2796">iPhone 14 Pro Max — 1290×2796</option>
+          </optgroup>
+          <optgroup label="Android">
+            <option value="1080x2400">Android — 1080×2400</option>
+            <option value="1440x3200">Android QHD — 1440×3200</option>
+          </optgroup>
+        </select>
+        <button class="btn btn-download" id="downloadBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Wallpaper
+        </button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <div class="main-header">
+      <span class="main-title">Preview</span>
+      <span class="word-count-badge" id="wordCountBadge">0 words</span>
+    </div>
+    <div class="canvas-area" id="canvasArea">
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="previewCanvas"></canvas>
+        <div class="canvas-empty-state visible" id="emptyState">
+          <svg class="canvas-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 7h4M4 12h8M4 17h6M14 17h6M14 12h6M14 7h6"/>
+          </svg>
+          <div class="canvas-empty-text">Your word cloud will appear here</div>
+          <div class="canvas-empty-sub">Add words using the sidebar</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// ── State ──
+const state = {
+  words: [],          // [{text, rating}]
+  palette: 0,
+  bgColor: '#0f172a',
+  font: 0,
+  allowRotation: true,
+};
+
+// ── Palettes ──
+const PALETTES = [
+  { name: 'Ocean',     colors: ['#38BDF8','#0EA5E9','#7DD3FC','#BAE6FD','#0369A1','#E0F2FE'] },
+  { name: 'Sunset',    colors: ['#FB923C','#F97316','#FBBF24','#FDE68A','#DC2626','#FED7AA'] },
+  { name: 'Forest',    colors: ['#4ADE80','#22C55E','#86EFAC','#BBFCD0','#15803D','#DCFCE7'] },
+  { name: 'Neon',      colors: ['#A855F7','#EC4899','#06B6D4','#F59E0B','#10B981','#F9A8D4'] },
+  { name: 'Mono',      colors: ['#F8FAFC','#E2E8F0','#CBD5E1','#94A3B8','#64748B','#FFFFFF'] },
+  { name: 'Pastel',    colors: ['#FDA4AF','#FDBA74','#FDE047','#86EFAC','#A5B4FC','#F9A8D4'] },
+];
+
+// ── Fonts ──
+const FONTS = [
+  { name: 'Sans-serif', label: 'Aa',   family: 'system-ui, -apple-system, sans-serif' },
+  { name: 'Serif',      label: 'Aa',   family: 'Georgia, "Times New Roman", serif' },
+  { name: 'Monospace',  label: 'Aa',   family: '"Courier New", Courier, monospace' },
+  { name: 'Rounded',    label: 'Aa',   family: 'ui-rounded, "Hiragino Maru Gothic ProN", Quicksand, Comfortaa, sans-serif' },
+  { name: 'Display',    label: 'Aa',   family: 'Impact, "Arial Black", sans-serif' },
+];
+
+// ── DOM refs ──
+const wordInput   = document.getElementById('wordInput');
+const ratingSlider = document.getElementById('ratingSlider');
+const ratingDisplay = document.getElementById('ratingDisplay');
+const addWordBtn  = document.getElementById('addWordBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const wordList    = document.getElementById('wordList');
+const wordEmpty   = document.getElementById('wordEmpty');
+const paletteGrid = document.getElementById('paletteGrid');
+const fontGrid    = document.getElementById('fontGrid');
+const bgColorPicker = document.getElementById('bgColorPicker');
+const rotationToggle = document.getElementById('rotationToggle');
+const exportSize  = document.getElementById('exportSize');
+const downloadBtn = document.getElementById('downloadBtn');
+const previewCanvas = document.getElementById('previewCanvas');
+const canvasArea  = document.getElementById('canvasArea');
+const canvasWrap  = document.getElementById('canvasWrap');
+const emptyState  = document.getElementById('emptyState');
+const wordCountBadge = document.getElementById('wordCountBadge');
+
+// ── Init palettes ──
+function initPalettes() {
+  PALETTES.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'palette-option' + (i === state.palette ? ' active' : '');
+    el.title = p.name;
+
+    const swatches = document.createElement('div');
+    swatches.className = 'palette-swatches';
+    p.colors.slice(0, 4).forEach(c => {
+      const s = document.createElement('span');
+      s.style.background = c;
+      swatches.appendChild(s);
+    });
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'palette-name';
+    nameEl.textContent = p.name;
+
+    el.appendChild(swatches);
+    el.appendChild(nameEl);
+    el.addEventListener('click', () => {
+      state.palette = i;
+      document.querySelectorAll('.palette-option').forEach((opt, j) =>
+        opt.classList.toggle('active', j === i));
+      render();
+    });
+    paletteGrid.appendChild(el);
+  });
+}
+
+// ── Init fonts ──
+function initFonts() {
+  FONTS.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'font-option' + (i === state.font ? ' active' : '');
+    el.style.cursor = 'pointer';
+
+    const preview = document.createElement('span');
+    preview.className = 'font-preview';
+    preview.style.fontFamily = f.family;
+    preview.textContent = 'Aa';
+
+    const label = document.createElement('span');
+    label.className = 'font-label';
+    label.textContent = f.name;
+
+    el.appendChild(preview);
+    el.appendChild(label);
+    el.addEventListener('click', () => {
+      state.font = i;
+      document.querySelectorAll('.font-option').forEach((opt, j) =>
+        opt.classList.toggle('active', j === i));
+      render();
+    });
+    fontGrid.appendChild(el);
+  });
+}
+
+// ── Word list rendering ──
+function refreshWordList() {
+  // Remove all except the empty placeholder
+  Array.from(wordList.children).forEach(c => {
+    if (c !== wordEmpty) wordList.removeChild(c);
+  });
+
+  if (state.words.length === 0) {
+    wordEmpty.style.display = 'block';
+  } else {
+    wordEmpty.style.display = 'none';
+    state.words.forEach((w, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'word-chip';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'word-chip-name';
+      nameEl.textContent = w.text;
+
+      const badge = document.createElement('span');
+      badge.className = 'word-chip-badge';
+      badge.textContent = w.rating;
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger-ghost';
+      delBtn.title = 'Remove';
+      delBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+      delBtn.addEventListener('click', () => {
+        state.words.splice(i, 1);
+        refreshWordList();
+        updateBadge();
+        render();
+      });
+
+      chip.appendChild(nameEl);
+      chip.appendChild(badge);
+      chip.appendChild(delBtn);
+      wordList.appendChild(chip);
+    });
+  }
+}
+
+function updateBadge() {
+  const n = state.words.length;
+  wordCountBadge.textContent = n === 1 ? '1 word' : `${n} words`;
+}
+
+// ── Add word ──
+function addWord() {
+  const text = wordInput.value.trim();
+  if (!text) { wordInput.focus(); return; }
+  const rating = parseInt(ratingSlider.value, 10);
+  state.words.push({ text, rating });
+  wordInput.value = '';
+  wordInput.focus();
+  refreshWordList();
+  updateBadge();
+  render();
+}
+
+addWordBtn.addEventListener('click', addWord);
+wordInput.addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
+ratingSlider.addEventListener('input', () => { ratingDisplay.textContent = ratingSlider.value; });
+clearAllBtn.addEventListener('click', () => {
+  if (state.words.length === 0) return;
+  state.words = [];
+  refreshWordList();
+  updateBadge();
+  render();
+});
+
+bgColorPicker.addEventListener('input', () => { state.bgColor = bgColorPicker.value; render(); });
+rotationToggle.addEventListener('change', () => { state.allowRotation = rotationToggle.checked; render(); });
+
+// ── Canvas sizing ──
+function getPreviewDimensions() {
+  const areaW = canvasArea.clientWidth - 48;
+  const areaH = canvasArea.clientHeight - 48;
+  const [w, h] = getExportDimensions();
+  const aspect = w / h;
+  let pw, ph;
+  if (areaW / areaH > aspect) {
+    ph = Math.min(areaH, 600);
+    pw = ph * aspect;
+  } else {
+    pw = Math.min(areaW, 900);
+    ph = pw / aspect;
+  }
+  return [Math.round(pw), Math.round(ph)];
+}
+
+function getExportDimensions() {
+  const val = exportSize.value;
+  const parts = val.split('x').map(Number);
+  return parts;
+}
+
+exportSize.addEventListener('change', () => { resizeCanvas(); render(); });
+
+function resizeCanvas() {
+  const [pw, ph] = getPreviewDimensions();
+  previewCanvas.width = pw;
+  previewCanvas.height = ph;
+  previewCanvas.style.width = pw + 'px';
+  previewCanvas.style.height = ph + 'px';
+}
+
+// ── Collision detection ──
+function rectsOverlap(a, b, pad = 4) {
+  return !(a.x + a.w + pad < b.x - pad ||
+           b.x + b.w + pad < a.x - pad ||
+           a.y + a.h + pad < b.y - pad ||
+           b.y + b.h + pad < a.y - pad);
+}
+
+// ── Word cloud render ──
+function render(targetCanvas, targetW, targetH) {
+  const canvas = targetCanvas || previewCanvas;
+  const W = targetW || canvas.width;
+  const H = targetH || canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = state.bgColor;
+  ctx.fillRect(0, 0, W, H);
+
+  if (state.words.length === 0) {
+    emptyState.classList.add('visible');
+    return;
+  }
+  emptyState.classList.remove('visible');
+
+  const palette = PALETTES[state.palette].colors;
+  const fontFamily = FONTS[state.font].family;
+
+  // Sort by rating desc
+  const sorted = [...state.words].sort((a, b) => b.rating - a.rating);
+
+  // Font size range scaled to canvas
+  const scale = Math.min(W, H) / 500;
+  const minSize = Math.max(14, 14 * scale);
+  const maxSize = Math.max(80, 80 * scale);
+
+  const placed = [];
+
+  const cx = W / 2;
+  const cy = H / 2;
+
+  for (let wi = 0; wi < sorted.length; wi++) {
+    const word = sorted[wi];
+    const t = (word.rating - 1) / 9;
+    const fontSize = minSize + t * (maxSize - minSize);
+    const rotate = state.allowRotation && Math.random() < 0.3 ? Math.PI / 2 : 0;
+    const color = palette[wi % palette.length];
+
+    ctx.save();
+    ctx.font = `${Math.round(fontSize)}px ${fontFamily}`;
+    const metrics = ctx.measureText(word.text);
+    const tw = metrics.width;
+    const th = fontSize * 1.1;
+
+    // Archimedean spiral
+    let placed_flag = false;
+    const step = 0.12;
+    const maxR = Math.max(W, H);
+
+    for (let angle = 0, r = 0; r < maxR; angle += step, r = 0.5 * step * angle) {
+      let px = cx + r * Math.cos(angle);
+      let py = cy + r * Math.sin(angle);
+
+      let bx, by, bw, bh;
+      if (rotate === 0) {
+        bx = px - tw / 2;
+        by = py - th / 2;
+        bw = tw;
+        bh = th;
+      } else {
+        bx = px - th / 2;
+        by = py - tw / 2;
+        bw = th;
+        bh = tw;
+      }
+
+      // Bounds check
+      if (bx < 0 || by < 0 || bx + bw > W || by + bh > H) continue;
+
+      // Collision check
+      const candidate = { x: bx, y: by, w: bw, h: bh };
+      const collision = placed.some(p => rectsOverlap(p, candidate));
+      if (!collision) {
+        placed.push(candidate);
+        ctx.translate(px, py);
+        ctx.rotate(rotate);
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(word.text, 0, 0);
+        placed_flag = true;
+        break;
+      }
+    }
+    ctx.restore();
+
+    if (!placed_flag) {
+      // Fallback: place at a random edge position if spiral exhausted
+    }
+  }
+}
+
+// ── Download ──
+downloadBtn.addEventListener('click', () => {
+  if (state.words.length === 0) {
+    wordInput.focus();
+    return;
+  }
+
+  const [W, H] = getExportDimensions();
+  const offscreen = document.createElement('canvas');
+  offscreen.width = W;
+  offscreen.height = H;
+  render(offscreen, W, H);
+
+  const link = document.createElement('a');
+  link.download = `wordcloud-${W}x${H}.png`;
+  link.href = offscreen.toDataURL('image/png');
+  link.click();
+});
+
+// ── Resize observer ──
+const ro = new ResizeObserver(() => {
+  resizeCanvas();
+  render();
+});
+ro.observe(canvasArea);
+
+// ── Boot ──
+initPalettes();
+initFonts();
+resizeCanvas();
+render();
+</script>
+</body>
+</html>
