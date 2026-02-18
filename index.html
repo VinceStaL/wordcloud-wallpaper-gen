@@ -730,7 +730,7 @@
             <button class="btn btn-ghost" id="clearAllBtn" style="font-size:11px;padding:3px 7px;" title="Clear all words">Clear all</button>
           </div>
         </div>
-        <input type="file" id="importFileInput" accept=".txt,text/plain" style="display:none;">
+        <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;">
         <div class="word-list" id="wordList">
           <div class="word-empty" id="wordEmpty">No words yet. Add some above!</div>
         </div>
@@ -1025,10 +1025,10 @@ const importFileInput = document.getElementById('importFileInput');
 
 exportWordsBtn.addEventListener('click', () => {
   if (state.words.length === 0) return;
-  const lines = state.words.map(w => w.text);
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const data = state.words.map(w => ({ text: w.text, rating: w.rating, strikethrough: w.strikethrough }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const link = document.createElement('a');
-  link.download = 'wordcloud-words.txt';
+  link.download = 'wordcloud-words.json';
   link.href = URL.createObjectURL(blob);
   link.click();
   URL.revokeObjectURL(link.href);
@@ -1044,14 +1044,17 @@ importFileInput.addEventListener('change', () => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const lines = e.target.result.split(/\r?\n/);
+    let parsed;
+    try { parsed = JSON.parse(e.target.result); } catch { return; }
+    if (!Array.isArray(parsed)) return;
     let added = 0;
-    lines.forEach(line => {
-      const text = line.trim().slice(0, 30);
-      if (text) {
-        state.words.push({ text, rating: 5, strikethrough: false });
-        added++;
-      }
+    parsed.forEach(item => {
+      const text = String(item.text ?? '').trim().slice(0, 30);
+      if (!text) return;
+      const rating = Math.min(10, Math.max(1, parseInt(item.rating, 10) || 5));
+      const strikethrough = item.strikethrough === true;
+      state.words.push({ text, rating, strikethrough });
+      added++;
     });
     if (added > 0) {
       refreshWordList();
